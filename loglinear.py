@@ -56,15 +56,11 @@ def loss_and_gradients(x, y, params):
     W, b = params
     probs = classifier_output(x, params)
     loss = -np.log(probs[y])
-
     y_vec = np.zeros(probs.shape[0], dtype=int)
     y_vec[y] = 1
-
     gb = probs - y_vec
-    gw_arr = []
-    for x_i in x:
-        gw_arr.append(gb*x_i)
-    gW = np.array(gw_arr)
+    x_reshaped = np.array(x).reshape(-1, 1)
+    gW = x_reshaped * gb
     return loss, [gW, gb]
 
 
