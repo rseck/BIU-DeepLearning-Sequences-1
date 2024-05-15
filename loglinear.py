@@ -56,10 +56,15 @@ def loss_and_gradients(x, y, params):
     W, b = params
     probs = classifier_output(x, params)
     loss = -np.log(probs[y])
-    softmax_grad = np.outer(probs, probs)
-    np.fill_diagonal(softmax_grad, probs * (1 - probs))
-    gW = softmax_grad * np.array(x).broadcast_to(W.shape)
-    gb = softmax_grad.copy()
+
+    y_vec = np.zeros(probs.shape[0], dtype=int)
+    y_vec[y] = 1
+
+    gb = probs - y_vec
+    gw_arr = []
+    for x_i in x:
+        gw_arr.append(gb*x_i)
+    gW = np.array(gw_arr)
     return loss, [gW, gb]
 
 
