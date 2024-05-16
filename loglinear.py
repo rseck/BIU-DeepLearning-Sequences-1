@@ -53,14 +53,13 @@ def loss_and_gradients(x, y, params):
     gW: matrix, gradients of W
     gb: vector, gradients of b
     """
-    W, b = params
     probs = classifier_output(x, params)
     loss = -np.log(probs[y])
     y_vec = np.zeros(probs.shape[0], dtype=int)
     y_vec[y] = 1
-    gb = probs - y_vec
-    x_reshaped = np.array(x).reshape(-1, 1)
-    gW = x_reshaped * gb
+    softmax_gradient = probs - y_vec
+    gb = softmax_gradient
+    gW = np.array(x).T @ gb
     return loss, [gW, gb]
 
 
