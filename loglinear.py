@@ -59,7 +59,7 @@ def loss_and_gradients(x, y, params):
     y_vec[y] = 1
     softmax_gradient = probs - y_vec
     gb = softmax_gradient
-    gW = np.array(x).T @ gb
+    gW = np.array(x).T @ softmax_gradient
     return loss, [gW, gb]
 
 
