@@ -3,7 +3,7 @@ import random
 import numpy as np
 
 import loglinear as ll
-from utils import TRAIN, DEV, F2I, L2I
+from utils import TRAIN, DEV, F2I, L2I, TEST, write_predictions
 
 STUDENT = {"name": "Yedidya Kfir", "ID": "209365188"}
 
@@ -30,6 +30,15 @@ def accuracy_on_dataset(dataset, params):
         else:
             bad += 1
     return good / (good + bad)
+
+
+def most_frequent(arr):
+    counts = np.bincount(arr)
+    return np.argmax(counts)
+
+
+def predict_dataset(dataset, params):
+    return [most_frequent(predict(feats_to_vec(features), params)) for _, features in dataset]
 
 
 def train_classifier(train_data, dev_data, num_iterations, learning_rate, params):
@@ -66,4 +75,6 @@ def predict(x, params):
 
 if __name__ == "__main__":
     params = ll.create_classifier(len(F2I), len(L2I))
-    trained_params = train_classifier(TRAIN, DEV, 100, 1e-3, params)
+    trained_params = train_classifier(TRAIN, DEV, 1000, 1e-3, params)
+    predictions = predict_dataset(TEST, params)
+    write_predictions(predictions, "test.pred")

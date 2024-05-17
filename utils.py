@@ -6,10 +6,16 @@ from collections import Counter
 
 def read_data(fname):
     data = []
-    for line in open(fname, 'rb'):
+    for line in open(fname, "rb"):
         label, text = line.strip().lower().decode().split("\t", 1)
         data.append((label, text))
     return data
+
+
+def write_predictions(predictions, fname):
+    with open(fname, "w") as f:
+        for pred in predictions:
+            f.write(str(L2I[pred]) + "\n")
 
 
 def text_to_bigrams(text):
@@ -18,6 +24,7 @@ def text_to_bigrams(text):
 
 TRAIN = [(l, text_to_bigrams(t)) for l, t in read_data("train")]
 DEV = [(l, text_to_bigrams(t)) for l, t in read_data("dev")]
+TEST = [(l, text_to_bigrams(t)) for l, t in read_data("test")]
 
 
 fc = Counter()
