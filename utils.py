@@ -1,12 +1,13 @@
+from collections import Counter
+
 # This file provides code which you may or may not find helpful.
 # Use it if you want, or ignore it.
-import random
 
 
 def read_data(fname):
     data = []
-    for line in file(fname):
-        label, text = line.strip().lower().split("\t", 1)
+    for line in open(fname, 'rb'):
+        label, text = line.strip().lower().decode().split("\t", 1)
         data.append((label, text))
     return data
 
@@ -18,7 +19,6 @@ def text_to_bigrams(text):
 TRAIN = [(l, text_to_bigrams(t)) for l, t in read_data("train")]
 DEV = [(l, text_to_bigrams(t)) for l, t in read_data("dev")]
 
-from collections import Counter
 
 fc = Counter()
 for l, feats in TRAIN:
