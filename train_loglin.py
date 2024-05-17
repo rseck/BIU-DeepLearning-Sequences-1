@@ -25,10 +25,8 @@ def accuracy_on_dataset(dataset, params):
         x = feats_to_vec(features)
         y = L2I[label]
         prediction = predict(x, params)
-        if prediction == y:
-            good += 1
-        else:
-            bad += 1
+        good += (prediction == y).sum()
+        bad += (prediction != y).sum()
     return good / (good + bad)
 
 
@@ -70,7 +68,7 @@ def train_classifier(train_data, dev_data, num_iterations, learning_rate, params
 
 
 def predict(x, params):
-    return np.argmax(ll.classifier_output(x, params))
+    return np.argmax(ll.classifier_output(x, params), axis=1)
 
 
 if __name__ == "__main__":
