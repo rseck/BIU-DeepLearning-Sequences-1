@@ -10,7 +10,7 @@ def softmax(x):
     returns: an n-dim vector (numpy array) of softmax values
     """
     x = np.exp(x - np.max(x))
-    x /= np.sum(x)
+    x /= np.sum(x, axis=1 if len(x.shape) > 1 else 0, keepdims=True)
     # Your code should be fast, so use a vectorized implementation using numpy,
     # don't use any loops.
     # With a vectorized implementation, the code should be no more than 2 lines.
