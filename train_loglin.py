@@ -1,4 +1,5 @@
 import random
+from collections import Counter
 
 import numpy as np
 
@@ -12,10 +13,11 @@ def feats_to_vec(features):
     identifiable_features = [
         feature_value for f in features if (feature_value := F2I.get(f, None))
     ]
-    real_features_size = len(identifiable_features)
-    vec = np.zeros((real_features_size, len(F2I)))
-    idx = np.array(identifiable_features)
-    vec[np.arange(real_features_size), idx] = 1
+    feature_counter = Counter(identifiable_features)
+    vec = np.zeros((1, len(F2I)))
+    idx = np.array(list(feature_counter.keys()))
+    values = np.array(list(feature_counter.values()))
+    vec[0, idx] = values
     return vec
 
 
@@ -73,6 +75,6 @@ def predict(x, params):
 
 if __name__ == "__main__":
     params = ll.create_classifier(len(F2I), len(L2I))
-    trained_params = train_classifier(TRAIN, DEV, 1000, 1e-3, params)
+    trained_params = train_classifier(TRAIN, DEV, 100, 1e-3, params)
     predictions = predict_dataset(TEST, params)
     write_predictions(predictions, "test.pred")
