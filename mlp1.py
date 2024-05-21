@@ -87,18 +87,42 @@ if __name__ == "__main__":
 
     def _loss_and_W_grad(W):
         global b
-        loss, grads = loss_and_gradients([1, 2, 3], 0, [W, b])
+        global U
+        global b_tag
+        loss, grads = loss_and_gradients([1, 2, 3], 0, [W, b, U, b_tag])
         return loss, grads[0]
 
 
     def _loss_and_b_grad(b):
         global W
-        loss, grads = loss_and_gradients([1, 2, 3], 0, [W, b])
+        global U
+        global b_tag
+        loss, grads = loss_and_gradients([1, 2, 3], 0, [W, b, U, b_tag])
         return loss, grads[1]
+
+
+    def _loss_and_U_grad(U):
+        global b
+        global W
+        global b_tag
+        loss, grads = loss_and_gradients([1, 2, 3], 0, [W, b, U, b_tag])
+        return loss, grads[2]
+
+
+    def _loss_and_b_tag_grad(b_tag):
+        global W
+        global U
+        global b
+        loss, grads = loss_and_gradients([1, 2, 3], 0, [W, b, U, b_tag])
+        return loss, grads[3]
 
 
     for _ in range(10):
         W = np.random.randn(W.shape[0], W.shape[1])
         b = np.random.randn(b.shape[0])
+        U = np.random.randn(U.shape[0], U.shape[1])
+        b_tag = np.random.randn(b_tag.shape[0])
         gradient_check(_loss_and_b_grad, b)
         gradient_check(_loss_and_W_grad, W)
+        gradient_check(_loss_and_b_tag_grad, b_tag)
+        gradient_check(_loss_and_U_grad, U)
