@@ -119,9 +119,9 @@ if __name__ == "__main__":
         write_predictions(predictions, f"mlp1_test_num_iter{num_iter}.pred")
     else:
         params = mlp1.create_classifier(in_dim=len(F2I_uni),
-                                        hid_dim=round(len(F2I_uni) * 1.5),
+                                        hid_dim=round(len(F2I_uni) * 2),
                                         out_dim=len(L2I_uni))
         num_iter = 50
         trained_params = train_classifier(TRAIN_UNI, DEV_UNI, num_iter, 1e-3, params)
         predictions = predict_dataset(TEST_UNI, params)
-        write_predictions(predictions, f"mlp1_test_unigrams_num_iter{num_iter}.pred")
+        write_predictions(predictions, f"higher_hidden_dim_mlp1_test_unigrams_num_iter{num_iter}.pred")
