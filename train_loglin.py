@@ -4,33 +4,17 @@ from collections import Counter
 import numpy as np
 
 import loglinear as ll
+from train_mlp1 import F2I_uni
 from utils import TRAIN, DEV, F2I, L2I, TEST, write_predictions
 
 STUDENT_1 = {"name": "Yedidya Kfir", "ID": "209365188"}
 STUDENT_2 = {"name": "Roee Esquira", "ID": "309840791"}
 
 
-def feats_to_vec(features):
-    identifiable_features = [
-        feature_value for f in features if (feature_value := F2I.get(f, None))
-    ]
-    feature_counter = Counter(identifiable_features)
-    vec = np.zeros((1, len(F2I)))
-    idx = np.array(list(feature_counter.keys()))
-    values = np.array(list(feature_counter.values()))
-    vec[0, idx] = values
-    return vec
 
 
-def accuracy_on_dataset(dataset, params):
-    good = bad = 0.0
-    for label, features in dataset:
-        x = feats_to_vec(features)
-        y = L2I[label]
-        prediction = predict(x, params)
-        good += (prediction == y).sum()
-        bad += (prediction != y).sum()
-    return good / (good + bad)
+
+
 
 
 def most_frequent(arr):
