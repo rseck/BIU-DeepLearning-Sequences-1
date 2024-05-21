@@ -41,13 +41,13 @@ def loss_and_gradients(x, y, params):
     y_vec[..., y] = 1
     softmax_gradient = probs - y_vec
 
-    first_layer_output = (W @ x) + b
-    tanh_res = np.tanh(first_layer_output)
-    gU = (tanh_res.reshape(-1, 1) @ softmax_gradient.reshape(1, -1)).T / tanh_res.shape[0]
-    gb_tag = softmax_gradient.mean(axis=0)
+    tanh_result = np.tanh((W @ x) + b)
+    gU = (tanh_result.reshape(-1, 1) @ softmax_gradient.reshape(1, -1)).T
+    gb_tag = softmax_gradient
+    gb = (U.T @ softmax_gradient) * (1 - (tanh_result * tanh_result))
+    gW = gb[:, np.newaxis] @ x.reshape(1, -1)
 
-
-    return ...
+    return loss,[gW, gb, gU, gb_tag]
 
 
 def create_classifier(in_dim, hid_dim, out_dim):
