@@ -10,7 +10,7 @@ def softmax(x):
     returns: an n-dim vector (numpy array) of softmax values
     """
     x = np.exp(x - np.max(x))
-    x /= np.sum(x)
+    x /= np.sum(x, axis=1 if len(x.shape) > 1 else 0, keepdims=True)
     # Your code should be fast, so use a vectorized implementation using numpy,
     # don't use any loops.
     # With a vectorized implementation, the code should be no more than 2 lines.
@@ -25,7 +25,7 @@ def classifier_output(x, params):
     of a log-linear classifier with given params on input x.
     """
     W, b = params
-    probs = softmax(np.dot(W.T, x) + b)
+    probs = softmax((W.T @ x.T).T + b.reshape(1, len(b)))
     return probs
 
 
@@ -53,13 +53,16 @@ def loss_and_gradients(x, y, params):
     gW: matrix, gradients of W
     gb: vector, gradients of b
     """
+    x = np.array(x)
+    if len(x.shape) == 1:
+        x = x.reshape(1, x.shape[0])
     probs = classifier_output(x, params)
-    loss = -np.log(probs[y])
-    y_vec = np.zeros(probs.shape[0], dtype=int)
-    y_vec[y] = 1
+    loss = -np.log(probs[..., y]).sum()
+    y_vec = np.zeros_like(probs, dtype=int)
+    y_vec[..., y] = 1
     softmax_gradient = probs - y_vec
-    gb = softmax_gradient
-    gW = np.array(x).T @ softmax_gradient
+    gb = softmax_gradient.mean(axis=0)
+    gW = (x.T @ softmax_gradient) / x.shape[0]
     return loss, [gW, gb]
 
 
