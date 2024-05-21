@@ -8,8 +8,8 @@ STUDENT = {"name": "YOUR NAME", "ID": "YOUR ID NUMBER"}
 def classifier_output(x, params):
     W, b, U, b_tag = params
     first_layer_output = (W @ x) + b
-    tanh_res = np.tanh(first_layer_output).squeeze()
-    second_layer_output = (U.T @ tanh_res.T).T + b_tag.reshape(1, len(b_tag))
+    tanh_res = np.tanh(first_layer_output)
+    second_layer_output = U @ tanh_res + b_tag
     return softmax(second_layer_output)
 
 
@@ -34,18 +34,16 @@ def loss_and_gradients(x, y, params):
     gb_tag: vector, gradients of b_tag
     """
     W, b, U, b_tag = params
-    x = np.array(x)
-    if len(x.shape) == 1:
-        x = x.reshape(1, x.shape[0])
+    x = np.array(x).squeeze()
     probs = classifier_output(x, params)
     loss = -np.log(probs[..., y]).sum()
     y_vec = np.zeros_like(probs, dtype=int)
     y_vec[..., y] = 1
     softmax_gradient = probs - y_vec
 
-    first_layer_output = (W.T @ x.T).T + b.reshape(1, len(b))
-    tanh_res = np.tanh(first_layer_output).squeeze()
-    gU = (tanh_res.T @ softmax_gradient) / tanh_res.shape[0]
+    first_layer_output = (W @ x) + b
+    tanh_res = np.tanh(first_layer_output)
+    gU = (tanh_res.reshape(-1, 1) @ softmax_gradient.reshape(1, -1)).T / tanh_res.shape[0]
     gb_tag = softmax_gradient.mean(axis=0)
 
 
@@ -63,7 +61,7 @@ def create_classifier(in_dim, hid_dim, out_dim):
     """
     W = glorot_init(hid_dim, in_dim)
     b = glorot_init(hid_dim, 1).squeeze()
-    U = glorot_init(out_dim, in_dim)
+    U = glorot_init(out_dim, hid_dim)
     b_tag = glorot_init(out_dim, 1).squeeze()
     return [W, b, U, b_tag]
 
