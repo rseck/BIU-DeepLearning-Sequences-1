@@ -6,7 +6,8 @@ import numpy as np
 import loglinear as ll
 from utils import TRAIN, DEV, F2I, L2I, TEST, write_predictions
 
-STUDENT = {"name": "Yedidya Kfir", "ID": "209365188"}
+STUDENT_1 = {"name": "Yedidya Kfir", "ID": "209365188"}
+STUDENT_2 = {"name": "Roee Esquira", "ID": "309840791"}
 
 
 def feats_to_vec(features):
@@ -77,4 +78,4 @@ if __name__ == "__main__":
     params = ll.create_classifier(len(F2I), len(L2I))
     trained_params = train_classifier(TRAIN, DEV, 100, 1e-3, params)
     predictions = predict_dataset(TEST, params)
-    write_predictions(predictions, "test.pred")
+    write_predictions(predictions, "loglinear_test.pred")

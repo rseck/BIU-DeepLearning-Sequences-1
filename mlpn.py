@@ -1,10 +1,15 @@
 import numpy as np
 
-STUDENT = {"name": "YOUR NAME", "ID": "YOUR ID NUMBER"}
+from mlp1 import glorot_init
+
+STUDENT_1 = {"name": "Roee Esquira", "ID": "309840791"}
+STUDENT_2 = {"name": "Yedidya Kfir", "ID": "209365188"}
+
 
 
 def classifier_output(x, params):
     # YOUR CODE HERE.
+    probs = []
     return probs
 
 
@@ -53,5 +58,41 @@ def create_classifier(dims):
     to first layer, then the second two are the matrix and vector from first to
     second layer, and so on.
     """
-    params = []
+    in_dim = dims[0]
+    out_dim = dims[-1]
+    hidden_layers_dims = dims[1:-1]
+    if len(hidden_layers_dims) == 0:
+        W = glorot_init(out_dim, in_dim)
+        b = glorot_init(out_dim, 1).squeeze()
+        params = [W, b]
+    elif len(hidden_layers_dims) == 1:
+        W1 = glorot_init(hidden_layers_dims[0], in_dim)
+        b1 = glorot_init(hidden_layers_dims[0], 1).squeeze()
+        U = glorot_init(out_dim, hidden_layers_dims[0])
+        b_tag = glorot_init(out_dim, 1).squeeze()
+        params = [W1, b1, U, b_tag]
+    else:
+        W1 = glorot_init(hidden_layers_dims[0], in_dim)
+        b1 = glorot_init(hidden_layers_dims[0], 1).squeeze()
+        params = [W1, b1]
+        for i in range(len(hidden_layers_dims)-1):
+            W_hidden = glorot_init(hidden_layers_dims[i+1], hidden_layers_dims[i])
+            b_hidden = glorot_init(hidden_layers_dims[i+1], 1).squeeze()
+            params.append(W_hidden)
+            params.append(b_hidden)
+        w_final = glorot_init(out_dim, hidden_layers_dims[-1])
+        b_final = glorot_init(out_dim, 1).squeeze()
+        params.append(w_final)
+        params.append(b_final)
     return params
+
+if __name__ == "__main__":
+    params = create_classifier([300,5])
+    assert len(params) == 2
+    params = create_classifier([300, 20, 5])
+    assert len(params) == 4
+    params = create_classifier([20, 30, 40, 10])
+    assert len(params) == 6
+    params = create_classifier([300,20,30,40,5])
+    assert len(params) == 8
+

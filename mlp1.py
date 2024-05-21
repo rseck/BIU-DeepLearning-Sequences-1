@@ -2,7 +2,9 @@ import numpy as np
 
 from loglinear import softmax
 
-STUDENT = {"name": "YOUR NAME", "ID": "YOUR ID NUMBER"}
+STUDENT_1 = {"name": "Roee Esquira", "ID": "309840791"}
+STUDENT_2 = {"name": "Yedidya Kfir", "ID": "209365188"}
+
 
 
 def classifier_output(x, params):
@@ -67,7 +69,6 @@ def create_classifier(in_dim, hid_dim, out_dim):
 
 
 def glorot_init(first_dim, second_dim):
-    return np.ones((first_dim, second_dim))
     epsilon = np.sqrt(6 / (first_dim + second_dim))
     return np.random.uniform(-epsilon, epsilon, (first_dim, second_dim))
 
