@@ -109,6 +109,8 @@ if __name__ == "__main__":
     # code to load the train and dev sets, set up whatever you need,
     # and call train_classifier.
     bigrams = False
+    unigrams = True
+    xor = False
     if bigrams:
         params = mlp1.create_classifier(in_dim=len(F2I),
                                         hid_dim=round(len(F2I) * 1.5),
@@ -117,11 +119,21 @@ if __name__ == "__main__":
         trained_params = train_classifier(TRAIN, DEV, num_iter, 1e-3, params)
         predictions = predict_dataset(TEST, params)
         write_predictions(predictions, f"mlp1_test_num_iter{num_iter}.pred")
-    else:
+    elif unigrams:
         params = mlp1.create_classifier(in_dim=len(F2I_uni),
                                         hid_dim=round(len(F2I_uni) * 4),
                                         out_dim=len(L2I_uni))
-        num_iter = 1000
+        num_iter = 115
         trained_params = train_classifier(TRAIN_UNI, DEV_UNI, num_iter, 1e-3, params)
         predictions = predict_dataset(TEST_UNI, params)
         write_predictions(predictions, f"higher_hidden_dim_mlp1_test_unigrams_num_iter{num_iter}.pred")
+    elif xor:
+        xor_data = [(1, [0, 0]), (0, [0, 1]), (0, [1, 0]), (1, [1, 1])]
+        params = mlp1.create_classifier(in_dim=2,
+                                        hid_dim=2,
+                                        out_dim=1)
+        num_iter = 10
+        trained_params = train_classifier(xor_data, xor_data, num_iter, 1e-3, params)
+        predictions = predict_dataset(xor_data, params)
+        write_predictions(predictions, f"xor_mlp1_num_iter{num_iter}.pred")
+
