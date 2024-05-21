@@ -13,9 +13,10 @@ def read_data(fname):
 
 
 def write_predictions(predictions, fname):
+    I2L = {i: l for l, i in L2I.items()}
     with open(fname, "w") as f:
         for pred in predictions:
-            f.write(str(L2I[pred]) + "\n")
+            f.write(str(I2L[pred]) + "\n")
 
 
 def text_to_bigrams(text):
