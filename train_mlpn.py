@@ -1,12 +1,23 @@
 import random
 
 import mlpn
-from train_loglin import feats_to_vec
 from utils import TRAIN, DEV, F2I, L2I, TEST, write_predictions
 import numpy as np
 
 STUDENT_1 = {"name": "Roee Esquira", "ID": "309840791"}
 STUDENT_2 = {"name": "Yedidya Kfir", "ID": "209365188"}
+
+
+def feats_to_vec(features):
+    identifiable_features = [
+        feature_value for f in features if (feature_value := F2I_uni.get(f, None))
+    ]
+    feature_counter = Counter(identifiable_features)
+    vec = np.zeros((1, len(F2I_uni)))
+    idx = np.array(list(feature_counter.keys()))
+    values = np.array(list(feature_counter.values()))
+    vec[0, idx] = values
+    return vec
 
 
 def accuracy_on_dataset(dataset, params):
@@ -62,7 +73,7 @@ def predict_dataset(dataset, params):
 if __name__ == "__main__":
     # code to load the train and dev sets, set up whatever you need,
     # and call train_classifier.
-    params = mlpn.create_classifier([300, 20, 30, 40, 5])
+    params = mlpn.create_classifier([600, 20, 30, 40, 5])
     num_iter = 2
     trained_params = train_classifier(TRAIN, DEV, num_iter, 1e-3, params)
     predictions = predict_dataset(TEST, params)

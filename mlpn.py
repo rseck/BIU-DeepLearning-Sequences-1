@@ -19,14 +19,14 @@ def classifier_output(x, params):
         return softmax(second_layer_output)
     else:
         W_1, b_1 = params[0:2]
-        first_layer_output = (W_1 @ x) + b_1
+        first_layer_output = (W_1 @ x) + b_1.reshape((b_1.shape[0], 1))
         tanh_res = np.tanh(first_layer_output)
         for i in range(2, len(params) - 2, 2):
             W_i, b_i = params[i:i + 2]
-            i_layer_output = (W_i @ tanh_res) + b_i
+            i_layer_output = (W_i @ tanh_res) + b_i.reshape((b_i.shape[0], 1))
             tanh_res = np.tanh(i_layer_output)
         W_n, b_n = params[-2:]
-        last_layer_output = (W_n @ tanh_res) + b_n
+        last_layer_output = (W_n @ tanh_res) + b_n.reshape((b_n.shape[0], 1))
         return softmax(last_layer_output)
 
 

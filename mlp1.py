@@ -38,6 +38,7 @@ def loss_and_gradients(x, y, params):
     W, b, U, b_tag = params
     x = np.array(x).squeeze()
     probs = classifier_output(x, params)
+    # print(probs.sum())
     loss = -np.log(probs[..., y]).sum()
     y_vec = np.zeros_like(probs, dtype=int)
     y_vec[..., y] = 1
