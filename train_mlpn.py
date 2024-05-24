@@ -1,4 +1,5 @@
 import random
+from datetime import datetime
 
 import mlpn
 from utils import TRAIN, DEV, F2I, L2I, TEST, write_predictions
@@ -76,13 +77,15 @@ if __name__ == "__main__":
     # code to load the train and dev sets, set up whatever you need,
     # and call train_classifier.
     # todo remove seed fix before submit
-    np.random.seed(42)
-    params = mlpn.create_classifier([len(F2I),
-                                     len(F2I) * 4,
-                                     len(F2I)*3,
-                                     round(len(F2I) * 2),
-                                     len(L2I)])
-    num_iter = 12
-    trained_params = train_classifier(TRAIN, DEV, num_iter, 1e-3, params)
-    predictions = predict_dataset(TEST, params)
-    write_predictions(predictions, f"mlpn_with_dims_{str([len(F2I), len(F2I) * 2, len(F2I) * 2, len(F2I),len(L2I)])}_test_num_iter{num_iter}.pred")
+    # seed 42 capped in 0.853 after 4 iterations
+    # np.random.seed(0)
+    for i in range(5):
+        params = mlpn.create_classifier([len(F2I),
+                                         len(F2I) * 2,
+                                         len(F2I),
+                                         round(len(F2I) / 2),
+                                         len(L2I)])
+        num_iter = 20
+        trained_params = train_classifier(TRAIN, DEV, num_iter, 1e-3, params)
+        predictions = predict_dataset(TEST, params)
+        write_predictions(predictions, f"{datetime.now()}_exp_{i}_mlpn_with_dims_{str([len(F2I), len(F2I) * 2, len(F2I) * 2, len(F2I),len(L2I)])}_test_num_iter{num_iter}.pred")
