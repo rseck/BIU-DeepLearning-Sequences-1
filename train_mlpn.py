@@ -78,12 +78,12 @@ if __name__ == "__main__":
     # and call train_classifier.
     # todo remove seed fix before submit
     # seed 42 capped in 0.853 after 4 iterations
-    # np.random.seed(0)
+    np.random.seed(0)
     for i in range(5):
         params = mlpn.create_classifier([len(F2I),
-                                         len(F2I) * 2,
+                                         len(F2I)*3,
+                                         len(F2I)*2,
                                          len(F2I),
-                                         round(len(F2I) / 2),
                                          len(L2I)])
         num_iter = 20
         trained_params = train_classifier(TRAIN, DEV, num_iter, 1e-3, params)
