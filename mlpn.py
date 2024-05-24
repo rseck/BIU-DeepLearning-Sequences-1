@@ -1,5 +1,4 @@
 import numpy as np
-
 from loglinear import softmax
 from mlp1 import glorot_init
 
@@ -27,7 +26,6 @@ def classifier_output(x, params):
         W_n, b_n = grouped_params[-1]
         last_layer_output = (W_n @ tanh_res) + b_n
         return softmax(last_layer_output)
-
 
 
 def predict(x, params):
