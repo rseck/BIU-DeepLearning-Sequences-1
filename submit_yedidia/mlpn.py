@@ -2,8 +2,7 @@ import numpy as np
 from loglinear import softmax
 from mlp1 import glorot_init
 
-STUDENT_1 = {"name": "Roee Esquira", "ID": "309840791"}
-STUDENT_2 = {"name": "Yedidya Kfir", "ID": "209365188"}
+STUDENT = {"name": "Yedidya Kfir", "ID": "209365188"}
 
 
 def classifier_output(x, params):

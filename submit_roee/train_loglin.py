@@ -1,12 +1,9 @@
 import random
 from collections import Counter
-
 import numpy as np
-
 import loglinear as ll
 
-STUDENT_1 = {"name": "Yedidya Kfir", "ID": "209365188"}
-STUDENT_2 = {"name": "Roee Esquira", "ID": "309840791"}
+STUDENT = {"name": "Roee Esquira", "ID": "309840791"}
 
 
 # utils segment

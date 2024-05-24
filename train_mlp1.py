@@ -1,13 +1,10 @@
+import mlp1
 import random
 from collections import Counter
-
 import numpy as np
 
-import loglinear as ll
-
-STUDENT_1 = {"name": "Yedidya Kfir", "ID": "209365188"}
-STUDENT_2 = {"name": "Roee Esquira", "ID": "309840791"}
-
+STUDENT_1 = {"name": "Roee Esquira", "ID": "309840791"}
+STUDENT_2 = {"name": "Yedidya Kfir", "ID": "209365188"}
 
 # utils segment
 def read_data(fname):
@@ -44,9 +41,8 @@ vocab = set([x for x, c in fc.most_common(600)])
 L2I = {l: i for i, l in enumerate(list(sorted(set([l for l, t in TRAIN]))))}
 # feature strings (bigrams) to IDs
 F2I = {f: i for i, f in enumerate(list(sorted(vocab)))}
-
-
 # end utils segment
+
 
 def feats_to_vec(features):
     identifiable_features = [
@@ -59,7 +55,6 @@ def feats_to_vec(features):
     vec[0, idx] = values
     return vec
 
-
 def accuracy_on_dataset(dataset, params):
     good = bad = 0.0
     for label, features in dataset:
@@ -69,15 +64,6 @@ def accuracy_on_dataset(dataset, params):
         good += (prediction == y).sum()
         bad += (prediction != y).sum()
     return good / (good + bad)
-
-
-def most_frequent(arr):
-    counts = np.bincount(arr)
-    return np.argmax(counts)
-
-
-def predict_dataset(dataset, params):
-    return [most_frequent(predict(feats_to_vec(features), params)) for _, features in dataset]
 
 
 def train_classifier(train_data, dev_data, num_iterations, learning_rate, params):
@@ -90,17 +76,22 @@ def train_classifier(train_data, dev_data, num_iterations, learning_rate, params
     learning_rate: the learning rate to use.
     params: list of parameters (initial values)
     """
-    w, b = params
+    W, b, U, b_tag = params
     for I in range(num_iterations):
         cum_loss = 0.0  # total loss in this iteration.
         random.shuffle(train_data)
         for label, features in train_data:
             x = feats_to_vec(features)  # convert features to a vector.
             y = L2I[label]  # convert the label to number if needed.
-            loss, (w_grad, b_grad) = ll.loss_and_gradients(x, y, params)
+            loss, (gW, gb, gU, gb_tag) = mlp1.loss_and_gradients(x, y, params)
             cum_loss += loss
-            w -= learning_rate * w_grad
-            b -= learning_rate * b_grad
+            # update the parameters according to the gradients
+            # and the learning rate.
+            W -= learning_rate * gW
+            b -= learning_rate * gb
+            U -= learning_rate * gU
+            b_tag -= learning_rate * gb_tag
+
         train_loss = cum_loss / len(train_data)
         train_accuracy = accuracy_on_dataset(train_data, params)
         dev_accuracy = accuracy_on_dataset(dev_data, params)
@@ -109,11 +100,21 @@ def train_classifier(train_data, dev_data, num_iterations, learning_rate, params
 
 
 def predict(x, params):
-    return np.argmax(ll.classifier_output(x, params), axis=1)
+    x = x.squeeze()
+    return np.argmax(mlp1.classifier_output(x, params))
+
+
+def predict_dataset(dataset, params):
+    return [predict(feats_to_vec(features), params) for _, features in dataset]
 
 
 if __name__ == "__main__":
-    params = ll.create_classifier(len(F2I), len(L2I))
-    trained_params = train_classifier(TRAIN, DEV, 100, 1e-3, params)
+    # code to load the train and dev sets, set up whatever you need,
+    # and call train_classifier.
+    params = mlp1.create_classifier(in_dim=len(F2I),
+                                    hid_dim=round(len(F2I) * 1.5),
+                                    out_dim=len(L2I))
+    num_iter = 100
+    trained_params = train_classifier(TRAIN, DEV, num_iter, 1e-3, params)
     predictions = predict_dataset(TEST, params)
-    write_predictions(predictions, "loglinear_test.pred")
+    write_predictions(predictions, f"mlp1_test_num_iter{num_iter}.pred")
