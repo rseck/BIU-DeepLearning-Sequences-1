@@ -1,9 +1,7 @@
 import numpy as np
 from loglinear import softmax
 
-STUDENT_1 = {"name": "Roee Esquira", "ID": "309840791"}
-STUDENT_2 = {"name": "Yedidya Kfir", "ID": "209365188"}
-
+STUDENT = {"name": "Roee Esquira", "ID": "309840791"}
 
 
 def classifier_output(x, params):
