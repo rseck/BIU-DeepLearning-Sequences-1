@@ -3,6 +3,8 @@ import random
 import mlpn
 from utils import TRAIN, DEV, F2I, L2I, TEST, write_predictions
 import numpy as np
+from collections import Counter
+
 
 STUDENT_1 = {"name": "Roee Esquira", "ID": "309840791"}
 STUDENT_2 = {"name": "Yedidya Kfir", "ID": "209365188"}
@@ -10,10 +12,10 @@ STUDENT_2 = {"name": "Yedidya Kfir", "ID": "209365188"}
 
 def feats_to_vec(features):
     identifiable_features = [
-        feature_value for f in features if (feature_value := F2I_uni.get(f, None))
+        feature_value for f in features if (feature_value := F2I.get(f, None))
     ]
     feature_counter = Counter(identifiable_features)
-    vec = np.zeros((1, len(F2I_uni)))
+    vec = np.zeros((1, len(F2I)))
     idx = np.array(list(feature_counter.keys()))
     values = np.array(list(feature_counter.values()))
     vec[0, idx] = values
@@ -73,8 +75,14 @@ def predict_dataset(dataset, params):
 if __name__ == "__main__":
     # code to load the train and dev sets, set up whatever you need,
     # and call train_classifier.
-    params = mlpn.create_classifier([600, 20, 30, 40, 5])
-    num_iter = 2
+    # todo remove seed fix before submit
+    np.random.seed(42)
+    params = mlpn.create_classifier([len(F2I),
+                                     len(F2I) * 4,
+                                     len(F2I)*3,
+                                     round(len(F2I) * 2),
+                                     len(L2I)])
+    num_iter = 12
     trained_params = train_classifier(TRAIN, DEV, num_iter, 1e-3, params)
     predictions = predict_dataset(TEST, params)
-    write_predictions(predictions, f"mlpn_test_num_iter{num_iter}.pred")
+    write_predictions(predictions, f"mlpn_with_dims_{str([len(F2I), len(F2I) * 2, len(F2I) * 2, len(F2I),len(L2I)])}_test_num_iter{num_iter}.pred")
