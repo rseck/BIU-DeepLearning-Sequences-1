@@ -1,3 +1,5 @@
 1. with the single layer MLP we get the same results as in the loglinear model, 0.86 accuracy rate. we tried with several dimensions and iterations combinations but this was the highest result we achieved, using a hidden dimension layer size 1200 and 50 iterations.
 2. using unigrams we got lower results, highest being 0.72 accuracy rate. this was achieved using a hidden dim of 552 (4 times the input length, the dictionary size, 138).
 3. for the XOR function our single layer MLP had to train 755 iterations with a hidden dim 15.
+
+please notice this is a joint submission for Roee Esquira, ID: 309840791 and Yedidya Kfir, ID: 209365188.
