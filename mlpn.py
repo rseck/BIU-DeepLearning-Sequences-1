@@ -18,16 +18,16 @@ def classifier_output(x, params):
         second_layer_output = W_2 @ tanh_res + b_2
         return softmax(second_layer_output)
     else:
-        W_1, b_1 = params[0:2]
-        first_layer_output = (W_1 @ x) + b_1.reshape((b_1.shape[0], 1))
-        tanh_res = np.tanh(first_layer_output)
-        for i in range(2, len(params) - 2, 2):
-            W_i, b_i = params[i:i + 2]
-            i_layer_output = (W_i @ tanh_res) + b_i.reshape((b_i.shape[0], 1))
+        grouped_params = [(params[i], params[i + 1]) for i in range(0, len(params), 2)]
+        tanh_res = x
+        for i in range(len(grouped_params) - 1):
+            W_i, b_i = grouped_params[i]
+            i_layer_output = (W_i @ tanh_res) + b_i
             tanh_res = np.tanh(i_layer_output)
-        W_n, b_n = params[-2:]
-        last_layer_output = (W_n @ tanh_res) + b_n.reshape((b_n.shape[0], 1))
+        W_n, b_n = grouped_params[-1]
+        last_layer_output = (W_n @ tanh_res) + b_n
         return softmax(last_layer_output)
+
 
 
 def predict(x, params):
@@ -71,36 +71,24 @@ def loss_and_gradients(x, y, params):
         gW_1 = gb_1[:, np.newaxis] @ x.reshape(1, -1)
         return loss, [gW_1, gb_1, gW_2, gb_2]
     else:
-        tanh_results = []
-        W_1, b_1 = params[0:2]
-        first_layer_output = (W_1 @ x) + b_1
-        tanh_res_1 = np.tanh(first_layer_output)
-        tanh_results.append(tanh_res_1)
-        for i in range(2, len(params) - 2, 2):
-            W_i, b_i = params[i:i + 2]
-            i_layer_output = (W_i @ tanh_results[-1]) + b_i
+        grouped_params = [(params[i], params[i + 1]) for i in range(0, len(params), 2)]
+        tanh_results = [x]
+        layer_outputs = [x]
+        for W_i, b_i in grouped_params:
+            i_layer_output = (W_i @ layer_outputs[-1]) + b_i
+            layer_outputs.append(i_layer_output)
             tanh_res = np.tanh(i_layer_output)
             tanh_results.append(tanh_res)
-        gWn = (tanh_results[-1].reshape(-1, 1) @ softmax_gradient.reshape(1, -1)).T
+
+        gWn = (tanh_results[-2].reshape(-1, 1) @ softmax_gradient.reshape(1, -1)).T
         gbn = softmax_gradient
-        grads_backwards = [gWn, gbn]
         grads = [gWn, gbn]
-        n_minus_1 = len(params) / 2
-        for i in range(len(params) - 2, 2, -2):
-            w_n_one_up, b_n_one_up = params[i:i + 2]
-            gbn_one_up = grads_backwards[-1]
-            tanh_res_n_current = tanh_results[(round(i / 2) - 1)]
-            gbk = (w_n_one_up.T @ gbn_one_up) * (1 - tanh_res_n_current * tanh_res_n_current)
-            tanh_res_n_one_down = tanh_results[(round(i / 2) - 2)]
-            gwk = gbk[:, np.newaxis] @ tanh_res_n_one_down.reshape(1, -1)
-            grads = [gwk, gbk] + grads
-            grads_backwards = grads_backwards + [gwk, gbk]
-        w_2 = params[2]
-        gb_2 = grads_backwards[-1]
-        tanh_res_1 = tanh_results[0]
-        gb_1 = (w_2.T @ gb_2) * (1 - tanh_res_1 * tanh_res_1)
-        gw_1 = gb_1[:, np.newaxis] @ x.reshape(1, -1)
-        grads = [gw_1, gb_1] + grads
+
+        for i in range(len(grouped_params) - 2, -1, -1):
+            gb_i = (grouped_params[i+1][0].T @ grads[1]) * (1-tanh_results[i+1] * tanh_results[i+1])
+            gw_i = gb_i[:, np.newaxis] @ layer_outputs[i].reshape(1, -1)
+            grads.insert(0, gb_i)
+            grads.insert(0, gw_i)
         return loss, grads
 
 
