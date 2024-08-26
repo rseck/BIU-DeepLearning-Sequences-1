@@ -9,22 +9,22 @@ STUDENT_2 = {"name": "Yedidya Kfir", "ID": "209365188"}
 def classifier_output(x, params):
     if len(params) == 2:
         W, b = params
-        return softmax((W @ x) + b)
+        return softmax(np.dot(x, W) + b)
     elif len(params) == 4:
         W_1, b_1, W_2, b_2 = params
-        first_layer_output = (W_1 @ x) + b_1
+        first_layer_output = np.dot(x, W_1) + b_1
         tanh_res = np.tanh(first_layer_output)
-        second_layer_output = W_2 @ tanh_res + b_2
+        second_layer_output = np.dot(tanh_res, W_2) + b_2
         return softmax(second_layer_output)
     else:
         grouped_params = [(params[i], params[i + 1]) for i in range(0, len(params), 2)]
         tanh_res = x
         for i in range(len(grouped_params) - 1):
             W_i, b_i = grouped_params[i]
-            i_layer_output = (W_i @ tanh_res) + b_i
+            i_layer_output = np.dot(tanh_res, W_i) + b_i
             tanh_res = np.tanh(i_layer_output)
         W_n, b_n = grouped_params[-1]
-        last_layer_output = (W_n @ tanh_res) + b_n
+        last_layer_output = np.dot(tanh_res, W_n) + b_n
         return softmax(last_layer_output)
 
 
@@ -49,43 +49,43 @@ def loss_and_gradients(x, y, params):
     (of course, if we request a linear classifier (ie, params is of length 2),
     you should not have gW2 and gb2.)
     """
-    x = np.array(x).squeeze()
-    probs = classifier_output(x, params)
-    loss = -np.log(probs[..., y]).sum()
+    x = np.array(x)
+    probs = classifier_output(x, params).squeeze()
+    loss = -np.log(probs)
     y_vec = np.zeros_like(probs, dtype=int)
-    y_vec[..., y] = 1
+    y_vec[y] = 1
     softmax_gradient = probs - y_vec
 
     if len(params) == 2:
-        gW = (x.reshape(-1, 1) @ softmax_gradient.reshape(1, -1)).T
+        gW = np.outer(x, softmax_gradient)
         gb = softmax_gradient
         return loss, [gW, gb]
     elif len(params) == 4:
         W_1, b_1, W_2, b_2 = params
-        tanh_result = np.tanh((W_1 @ x) + b_1)
-        gW_2 = (tanh_result.reshape(-1, 1) @ softmax_gradient.reshape(1, -1)).T
+        tanh_result = np.tanh(np.dot(x, W_1) + b_1)
+        gW_2 = np.outer(tanh_result, softmax_gradient)
         gb_2 = softmax_gradient
-        gb_1 = (W_2.T @ softmax_gradient) * (1 - (tanh_result * tanh_result))
-        gW_1 = gb_1[:, np.newaxis] @ x.reshape(1, -1)
+        gb_1 = np.dot(softmax_gradient, W_2) * (1 - (tanh_result * tanh_result))
+        gW_1 = np.outer(x, gb_1)
         return loss, [gW_1, gb_1, gW_2, gb_2]
     else:
         grouped_params = [(params[i], params[i + 1]) for i in range(0, len(params), 2)]
         tanh_results = [x]
         layer_outputs = [x]
         for W_i, b_i in grouped_params:
-            i_layer_output = (W_i @ layer_outputs[-1]) + b_i
+            i_layer_output = np.dot(layer_outputs[-1], W_i) + b_i
             layer_outputs.append(i_layer_output)
             tanh_res = np.tanh(i_layer_output)
             tanh_results.append(tanh_res)
 
-        gWn = (tanh_results[-2].reshape(-1, 1) @ softmax_gradient.reshape(1, -1)).T
+        gWn = np.outer(tanh_results[-2], softmax_gradient)
         gbn = softmax_gradient
         grads = [gWn, gbn]
 
         for i in range(len(grouped_params) - 2, -1, -1):
-            gb_i = (grouped_params[i+1][0].T @ grads[1]) * (1-tanh_results[i+1] * tanh_results[i+1])
-            gw_i = gb_i[:, np.newaxis] @ layer_outputs[i].reshape(1, -1)
-            grads.insert(0, gb_i)
+            gb_i = (np.dot(grouped_params[i+1][0], grads[1])) * (1-tanh_results[i+1] * tanh_results[i+1])
+            gw_i = np.outer(layer_outputs[i], gb_i)
+            grads.insert(0, gb_i.squeeze())
             grads.insert(0, gw_i)
         return loss, grads
 
@@ -114,26 +114,26 @@ def create_classifier(dims):
     out_dim = dims[-1]
     hidden_layers_dims = dims[1:-1]
     if len(hidden_layers_dims) == 0:
-        W = glorot_init(out_dim, in_dim)
-        b = glorot_init(out_dim, 1).squeeze()
+        W = glorot_init(in_dim, out_dim)
+        b = glorot_init(out_dim, 1)
         params = [W, b]
     elif len(hidden_layers_dims) == 1:
         W1 = glorot_init(hidden_layers_dims[0], in_dim)
-        b1 = glorot_init(hidden_layers_dims[0], 1).squeeze()
-        U = glorot_init(out_dim, hidden_layers_dims[0])
-        b_tag = glorot_init(out_dim, 1).squeeze()
+        b1 = glorot_init(hidden_layers_dims[0], 1)
+        U = glorot_init(hidden_layers_dims[0], out_dim)
+        b_tag = glorot_init(out_dim, 1)
         params = [W1, b1, U, b_tag]
     else:
-        W1 = glorot_init(hidden_layers_dims[0], in_dim)
-        b1 = glorot_init(hidden_layers_dims[0], 1).squeeze()
+        W1 = glorot_init(in_dim, hidden_layers_dims[0])
+        b1 = glorot_init(hidden_layers_dims[0], 1)
         params = [W1, b1]
         for i in range(len(hidden_layers_dims) - 1):
-            W_hidden = glorot_init(hidden_layers_dims[i + 1], hidden_layers_dims[i])
-            b_hidden = glorot_init(hidden_layers_dims[i + 1], 1).squeeze()
+            W_hidden = glorot_init(hidden_layers_dims[i], hidden_layers_dims[i + 1])
+            b_hidden = glorot_init(hidden_layers_dims[i + 1], 1)
             params.append(W_hidden)
             params.append(b_hidden)
-        w_final = glorot_init(out_dim, hidden_layers_dims[-1])
-        b_final = glorot_init(out_dim, 1).squeeze()
+        w_final = glorot_init(hidden_layers_dims[-1], out_dim)
+        b_final = glorot_init(out_dim, 1)
         params.append(w_final)
         params.append(b_final)
     return params

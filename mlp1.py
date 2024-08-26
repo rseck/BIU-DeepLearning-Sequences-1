@@ -8,9 +8,9 @@ STUDENT_2 = {"name": "Yedidya Kfir", "ID": "209365188"}
 
 def classifier_output(x, params):
     W, b, U, b_tag = params
-    first_layer_output = (W @ x) + b
+    first_layer_output = np.dot(x, W) + b
     tanh_res = np.tanh(first_layer_output)
-    second_layer_output = U @ tanh_res + b_tag
+    second_layer_output = np.dot(tanh_res, U) + b_tag
     return softmax(second_layer_output)
 
 
@@ -38,18 +38,18 @@ def loss_and_gradients(x, y, params):
     x = np.array(x).squeeze()
     probs = classifier_output(x, params)
     # print(probs.sum())
-    loss = -np.log(probs[..., y]).sum()
+    loss = -np.log(probs[y])
     y_vec = np.zeros_like(probs, dtype=int)
-    y_vec[..., y] = 1
+    y_vec[y] = 1
     softmax_gradient = probs - y_vec
 
-    tanh_result = np.tanh((W @ x) + b)
-    gU = (tanh_result.reshape(-1, 1) @ softmax_gradient.reshape(1, -1)).T
+    tanh_result = np.tanh(np.dot(x, W) + b)
+    gU = np.outer(tanh_result, softmax_gradient)
     gb_tag = softmax_gradient
-    gb = (U.T @ softmax_gradient) * (1 - (tanh_result * tanh_result))
-    gW = gb[:, np.newaxis] @ x.reshape(1, -1)
+    gb = np.dot(U, softmax_gradient) * (1 - (tanh_result * tanh_result))
+    gW = np.outer(x, gb)
 
-    return loss,[gW, gb, gU, gb_tag]
+    return loss, [gW, gb, gU, gb_tag]
 
 
 def create_classifier(in_dim, hid_dim, out_dim):
@@ -61,16 +61,16 @@ def create_classifier(in_dim, hid_dim, out_dim):
     return:
     a flat list of 4 elements, W, b, U, b_tag.
     """
-    W = glorot_init(hid_dim, in_dim)
-    b = glorot_init(hid_dim, 1).squeeze()
-    U = glorot_init(out_dim, hid_dim)
-    b_tag = glorot_init(out_dim, 1).squeeze()
+    W = glorot_init(in_dim, hid_dim)
+    b = glorot_init(hid_dim, 1)
+    U = glorot_init(hid_dim, out_dim)
+    b_tag = glorot_init(out_dim, 1)
     return [W, b, U, b_tag]
 
 
 def glorot_init(first_dim, second_dim):
     epsilon = np.sqrt(6 / (first_dim + second_dim))
-    return np.random.uniform(-epsilon, epsilon, (first_dim, second_dim))
+    return np.random.uniform(-epsilon, epsilon, first_dim) if second_dim == 1 else np.random.uniform(-epsilon, epsilon, (first_dim, second_dim))
 
 
 if __name__ == "__main__":

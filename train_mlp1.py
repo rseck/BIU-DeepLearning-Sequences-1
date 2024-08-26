@@ -100,7 +100,6 @@ def train_classifier(train_data, dev_data, num_iterations, learning_rate, params
 
 
 def predict(x, params):
-    x = x.squeeze()
     return np.argmax(mlp1.classifier_output(x, params))
 
 
